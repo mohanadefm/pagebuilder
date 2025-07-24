@@ -12,13 +12,18 @@ interface FooterSectionProps {
 const FooterSection: React.FC<FooterSectionProps> = ({ properties, isSelected, onClick }) => {
   return (
     <footer
-      className={`relative py-8 cursor-pointer transition-all duration-300 ${
+      className={`relative cursor-pointer transition-all duration-300 flex items-center ${
         isSelected ? 'ring-2 ring-blue-500 ring-offset-2' : ''
       }`}
-      style={{ backgroundColor: properties.backgroundColor, color: properties.textColor }}
+      style={{ 
+        backgroundColor: properties.backgroundColor, 
+        color: properties.textColor,
+        height: properties.height || '200px',
+        minHeight: properties.height || '200px',
+      }}
       onClick={onClick}
     >
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto px-4 w-full">
         <div className="flex flex-col md:flex-row items-center justify-between">
           <div className="mb-4 md:mb-0">
             <p className="text-lg font-semibold">{properties.companyName}</p>

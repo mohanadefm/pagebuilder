@@ -1,6 +1,6 @@
 export interface Section {
   id: string;
-  type: 'header' | 'hero' | 'about' | 'features' | 'footer';
+  type: 'header' | 'hero' | 'about' | 'features' | 'contact' | 'footer';
   properties: Record<string, any>;
   order: number;
 }
@@ -10,6 +10,7 @@ export interface HeaderProperties {
   navigationItems: string[];
   backgroundColor: string;
   textColor: string;
+  height: string; // Added height property
 }
 
 export interface HeroProperties {
@@ -19,6 +20,7 @@ export interface HeroProperties {
   backgroundImage: string;
   backgroundColor: string;
   textColor: string;
+  height: string; // Added height property
 }
 
 export interface AboutProperties {
@@ -26,6 +28,7 @@ export interface AboutProperties {
   content: string;
   backgroundColor: string;
   textColor: string;
+  height: string; // Added height property
 }
 
 export interface FeaturesProperties {
@@ -37,6 +40,19 @@ export interface FeaturesProperties {
   }>;
   backgroundColor: string;
   textColor: string;
+  height: string; // Added height property
+}
+
+export interface ContactProperties {
+  title: string;
+  subtitle: string;
+  email: string;
+  phone: string;
+  address: string;
+  showContactForm: boolean;
+  backgroundColor: string;
+  textColor: string;
+  height: string; // Added height property
 }
 
 export interface FooterProperties {
@@ -44,6 +60,7 @@ export interface FooterProperties {
   links: string[];
   backgroundColor: string;
   textColor: string;
+  height: string; // Added height property
 }
 
 export interface SiteData {

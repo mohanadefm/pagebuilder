@@ -4,27 +4,32 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { useBuilder } from '../contexts/BuilderContext';
 import { HexColorPicker } from 'react-colorful';
-import { X, Palette, Type, Image } from 'lucide-react';
+import { X, Palette, Type, Image, Ruler } from 'lucide-react';
 
-const EditPanel: React.FC = () => {
+const EditPanel: React.FC = React.memo(() => {
   const { state, updateSection, selectSection } = useBuilder();
   
-  const selectedSection = state.sections.find(s => s.id === state.selectedSection);
+  const selectedSection = React.useMemo(() => 
+    state.sections.find(s => s.id === state.selectedSection), 
+    [state.sections, state.selectedSection]
+  );
 
-  if (!selectedSection || !state.isEditPanelOpen) return null;
+  const handlePropertyUpdate = React.useCallback((property: string, value: any) => {
+    if (selectedSection) {
+      updateSection(selectedSection.id, { [property]: value });
+    }
+  }, [updateSection, selectedSection]);
 
-  const handlePropertyUpdate = (property: string, value: any) => {
-    updateSection(selectedSection.id, { [property]: value });
-  };
+  const handleNestedPropertyUpdate = React.useCallback((parentProperty: string, index: number, property: string, value: any) => {
+    if (selectedSection) {
+      const currentArray = selectedSection.properties[parentProperty] || [];
+      const updatedArray = [...currentArray];
+      updatedArray[index] = { ...updatedArray[index], [property]: value };
+      updateSection(selectedSection.id, { [parentProperty]: updatedArray });
+    }
+  }, [updateSection, selectedSection]);
 
-  const handleNestedPropertyUpdate = (parentProperty: string, index: number, property: string, value: any) => {
-    const currentArray = selectedSection.properties[parentProperty] || [];
-    const updatedArray = [...currentArray];
-    updatedArray[index] = { ...updatedArray[index], [property]: value };
-    updateSection(selectedSection.id, { [parentProperty]: updatedArray });
-  };
-
-  const renderColorPicker = (label: string, property: string, value: string) => (
+  const renderColorPicker = React.useCallback((label: string, property: string, value: string) => (
     <div className="mb-6">
       <label className="block text-sm font-medium text-gray-700 mb-2">
         <Palette size={16} className="inline mr-2" />
@@ -34,7 +39,7 @@ const EditPanel: React.FC = () => {
         <HexColorPicker
           color={value}
           onChange={(color) => handlePropertyUpdate(property, color)}
-          className="w-full"
+          className="w-full max-w-[200px]"
         />
         <input
           type="text"
@@ -44,9 +49,9 @@ const EditPanel: React.FC = () => {
         />
       </div>
     </div>
-  );
+  ), [handlePropertyUpdate]);
 
-  const renderTextInput = (label: string, property: string, value: string, isTextarea = false) => (
+  const renderTextInput = React.useCallback((label: string, property: string, value: string, isTextarea = false) => (
     <div className="mb-6">
       <label className="block text-sm font-medium text-gray-700 mb-2">
         <Type size={16} className="inline mr-2" />
@@ -68,9 +73,40 @@ const EditPanel: React.FC = () => {
         />
       )}
     </div>
-  );
+  ), [handlePropertyUpdate]);
 
-  const renderImageInput = (label: string, property: string, value: string) => (
+  const renderHeightInput = React.useCallback((label: string, property: string, value: string) => (
+    <div className="mb-6">
+      <label className="block text-sm font-medium text-gray-700 mb-2">
+        <Ruler size={16} className="inline mr-2" />
+        {label}
+      </label>
+      <input
+        type="text"
+        value={value}
+        onChange={(e) => handlePropertyUpdate(property, e.target.value)}
+        placeholder="e.g., 400px, 50vh, 100%"
+        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent mb-2"
+      />
+      <select
+        value={value.includes('px') ? 'px' : value.includes('vh') ? 'vh' : value.includes('%') ? '%' : 'px'}
+        onChange={(e) => {
+          const numericValue = value.replace(/[^\d]/g, '') || '400';
+          handlePropertyUpdate(property, `${numericValue}${e.target.value}`);
+        }}
+        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+      >
+        <option value="px">px</option>
+        <option value="vh">vh</option>
+        <option value="%">%</option>
+      </select>
+      <p className="text-xs text-gray-500 mt-1">
+        Examples: 400px, 50vh, 100%
+      </p>
+    </div>
+  ), [handlePropertyUpdate]);
+
+  const renderImageInput = React.useCallback((label: string, property: string, value: string) => (
     <div className="mb-6">
       <label className="block text-sm font-medium text-gray-700 mb-2">
         <Image size={16} className="inline mr-2" />
@@ -89,7 +125,16 @@ const EditPanel: React.FC = () => {
         </div>
       )}
     </div>
-  );
+  ), [handlePropertyUpdate]);
+
+  const handleClose = React.useCallback(() => {
+    selectSection(null);
+  }, [selectSection]);
+
+  // Early return after all hooks are defined
+  if (!selectedSection || !state.isEditPanelOpen) {
+    return null;
+  }
 
   const renderSectionEditor = () => {
     const { properties } = selectedSection;
@@ -115,6 +160,7 @@ const EditPanel: React.FC = () => {
                 />
               ))}
             </div>
+            {renderHeightInput('Section Height', 'height', properties.height || '80px')}
             {renderColorPicker('Background Color', 'backgroundColor', properties.backgroundColor)}
             {renderColorPicker('Text Color', 'textColor', properties.textColor)}
           </div>
@@ -127,6 +173,7 @@ const EditPanel: React.FC = () => {
             {renderTextInput('Subtitle', 'subtitle', properties.subtitle, true)}
             {renderTextInput('Button Text', 'buttonText', properties.buttonText)}
             {renderImageInput('Background Image', 'backgroundImage', properties.backgroundImage)}
+            {renderHeightInput('Section Height', 'height', properties.height || '600px')}
             {renderColorPicker('Background Color', 'backgroundColor', properties.backgroundColor)}
             {renderColorPicker('Text Color', 'textColor', properties.textColor)}
           </div>
@@ -137,6 +184,7 @@ const EditPanel: React.FC = () => {
           <div>
             {renderTextInput('Title', 'title', properties.title)}
             {renderTextInput('Content', 'content', properties.content, true)}
+            {renderHeightInput('Section Height', 'height', properties.height || '400px')}
             {renderColorPicker('Background Color', 'backgroundColor', properties.backgroundColor)}
             {renderColorPicker('Text Color', 'textColor', properties.textColor)}
           </div>
@@ -177,6 +225,32 @@ const EditPanel: React.FC = () => {
                 </div>
               ))}
             </div>
+            {renderHeightInput('Section Height', 'height', properties.height || '500px')}
+            {renderColorPicker('Background Color', 'backgroundColor', properties.backgroundColor)}
+            {renderColorPicker('Text Color', 'textColor', properties.textColor)}
+          </div>
+        );
+
+      case 'contact':
+        return (
+          <div>
+            {renderTextInput('Title', 'title', properties.title)}
+            {renderTextInput('Subtitle', 'subtitle', properties.subtitle)}
+            {renderTextInput('Email', 'email', properties.email)}
+            {renderTextInput('Phone', 'phone', properties.phone)}
+            {renderTextInput('Address', 'address', properties.address, true)}
+            <div className="mb-6">
+              <label className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  checked={properties.showContactForm}
+                  onChange={(e) => handlePropertyUpdate('showContactForm', e.target.checked)}
+                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                />
+                <span className="text-sm font-medium text-gray-700">Show Contact Form</span>
+              </label>
+            </div>
+            {renderHeightInput('Section Height', 'height', properties.height || '600px')}
             {renderColorPicker('Background Color', 'backgroundColor', properties.backgroundColor)}
             {renderColorPicker('Text Color', 'textColor', properties.textColor)}
           </div>
@@ -202,6 +276,7 @@ const EditPanel: React.FC = () => {
                 />
               ))}
             </div>
+            {renderHeightInput('Section Height', 'height', properties.height || '200px')}
             {renderColorPicker('Background Color', 'backgroundColor', properties.backgroundColor)}
             {renderColorPicker('Text Color', 'textColor', properties.textColor)}
           </div>
@@ -218,24 +293,30 @@ const EditPanel: React.FC = () => {
       animate={{ x: 0 }}
       exit={{ x: 400 }}
       transition={{ type: 'spring', damping: 20, stiffness: 100 }}
-      className="w-80 bg-white border-l border-gray-200 shadow-lg overflow-y-auto"
+      className="w-full lg:w-80 bg-white border-l border-gray-200 shadow-lg h-full flex flex-col"
     >
-      <div className="p-6">
+      <div className="p-4 lg:p-6 flex-shrink-0">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-semibold text-gray-800">
+          <h2 className="text-lg lg:text-xl font-semibold text-gray-800">
             Edit {selectedSection.type.charAt(0).toUpperCase() + selectedSection.type.slice(1)}
           </h2>
           <button
-            onClick={() => selectSection(null)}
+            onClick={handleClose}
             className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
           >
             <X size={20} className="text-gray-500" />
           </button>
         </div>
-        {renderSectionEditor()}
+      </div>
+      <div className="flex-1 overflow-y-auto px-4 lg:px-6 pb-4 lg:pb-6">
+        <div className="space-y-4">
+          {renderSectionEditor()}
+        </div>
       </div>
     </motion.div>
   );
-};
+});
+
+EditPanel.displayName = 'EditPanel';
 
 export default EditPanel;
