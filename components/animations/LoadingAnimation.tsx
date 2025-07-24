@@ -1,44 +1,44 @@
 "use client";
 
-import React from 'react';
-import { motion } from 'framer-motion';
+import React, { useMemo } from 'react';
+import { motion, Variants } from 'framer-motion';
 
 interface LoadingAnimationProps {
   size?: 'sm' | 'md' | 'lg';
-  color?: string;
   className?: string;
+  color?: string;
 }
 
 const LoadingAnimation: React.FC<LoadingAnimationProps> = ({ 
-  size = 'md',
-  color = '#3b82f6',
-  className = ""
+  size = 'md', 
+  className = '',
+  color = '#3b82f6'
 }) => {
-  const sizeMap = {
-    sm: 16,
-    md: 24,
-    lg: 32,
-  };
+  const sizeMap = useMemo(() => ({
+    sm: 20,
+    md: 40,
+    lg: 60,
+  }), []);
 
-  const circleVariants = {
+  const circleVariants: Variants = {
     animate: {
       rotate: 360,
       transition: {
-        duration: 1,
+        duration: 1.5,
         repeat: Infinity,
-        ease: 'linear',
+        ease: "easeInOut" as const,
       },
     },
   };
 
-  const dotVariants = {
+  const dotVariants: Variants = {
     animate: {
       scale: [1, 1.2, 1],
       opacity: [0.5, 1, 0.5],
       transition: {
         duration: 1.5,
         repeat: Infinity,
-        ease: 'easeInOut',
+        ease: "easeInOut" as const,
       },
     },
   };
@@ -60,23 +60,20 @@ const LoadingAnimation: React.FC<LoadingAnimationProps> = ({
           <motion.circle
             cx="12"
             cy="12"
-            r="10"
+            r="8"
             stroke={color}
             strokeWidth="2"
             strokeLinecap="round"
-            strokeDasharray="31.416"
-            strokeDashoffset="31.416"
-            variants={{
-              animate: {
-                strokeDashoffset: 0,
-                transition: {
-                  duration: 1,
-                  repeat: Infinity,
-                  ease: 'linear',
-                },
-              },
+            strokeDasharray="32"
+            strokeDashoffset="32"
+            animate={{
+              strokeDashoffset: [32, 0, 32],
             }}
-            animate="animate"
+            transition={{
+              duration: 2,
+              repeat: Infinity,
+              ease: "easeInOut" as const,
+            }}
           />
         </svg>
       </motion.div>
@@ -84,18 +81,32 @@ const LoadingAnimation: React.FC<LoadingAnimationProps> = ({
   }
 
   return (
-    <div className={`flex space-x-1 ${className}`}>
+    <motion.div
+      className={`flex items-center justify-center space-x-1 ${className}`}
+      variants={dotVariants}
+      animate="animate"
+    >
       {[0, 1, 2].map((index) => (
         <motion.div
           key={index}
-          className="w-2 h-2 rounded-full"
-          style={{ backgroundColor: color }}
-          variants={dotVariants}
-          animate="animate"
-          transition={{ delay: index * 0.2 }}
+          className="rounded-full"
+          style={{
+            backgroundColor: color,
+            width: sizeMap[size] / 4,
+            height: sizeMap[size] / 4,
+          }}
+          animate={{
+            y: [-2, -8, -2],
+          }}
+          transition={{
+            duration: 1.2,
+            repeat: Infinity,
+            delay: index * 0.2,
+            ease: "easeInOut" as const,
+          }}
         />
       ))}
-    </div>
+    </motion.div>
   );
 };
 

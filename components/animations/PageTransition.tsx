@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, Transition } from 'framer-motion';
 
 interface PageTransitionProps {
   children: React.ReactNode;
@@ -27,7 +27,7 @@ const PageTransition: React.FC<PageTransitionProps> = ({
     },
   };
 
-  const pageTransition = {
+  const pageTransition: Transition = {
     type: 'tween',
     ease: 'anticipate',
     duration: 0.4,
