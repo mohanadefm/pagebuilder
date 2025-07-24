@@ -41,20 +41,21 @@ const FeaturesSection: React.FC<FeaturesSectionProps> = ({ properties, isSelecte
           {properties.features.map((feature, index) => {
             const Icon = iconMap[feature.icon as keyof typeof iconMap] || Star;
             return (
-              <div key={index} className="text-center p-4 sm:p-6 rounded-lg bg-white bg-opacity-10 hover:bg-opacity-20 transition-all duration-300">
+              <div key={index} className="text-center p-4 sm:p-6 rounded-lg bg-white bg-opacity-10 hover:bg-opacity-20 transition-all duration-300 w-full">
                 <div className="flex justify-center mb-3 sm:mb-4">
-                  <Icon size={32} className="sm:w-10 sm:h-10 text-blue-400" />
+                  <Icon size={28} className="sm:w-8 sm:h-8 md:w-10 md:h-10 text-blue-400" />
                 </div>
-                <h3 className="text-base sm:text-lg font-semibold mb-2 sm:mb-3 leading-tight">
+                <h3 className="text-sm sm:text-base md:text-lg font-semibold mb-2 sm:mb-3 leading-tight">
                   {feature.title}
                 </h3>
-                <p className="text-sm leading-relaxed text-opacity-80">
+                <p className="text-xs sm:text-sm leading-relaxed text-opacity-80">
                   {feature.description}
                 </p>
               </div>
             );
           })}
         </div>
+
       </div>
       {isSelected && (
         <div className="absolute inset-0 bg-blue-500 bg-opacity-10 pointer-events-none" />

@@ -215,6 +215,107 @@ const PreviewArea: React.FC = React.memo(() => {
       )}
       
       <div className={getPreviewFrameClasses()}>
+        {/* Add device-specific styles when in preview mode */}
+        {state.isPreviewMode && (state.previewDevice === 'mobile' || state.previewDevice === 'tablet') && (
+          <style dangerouslySetInnerHTML={{
+            __html: `
+              .mobile-preview .grid,
+              .mobile-preview [class*="grid-cols"],
+              .tablet-preview .grid,
+              .tablet-preview [class*="grid-cols"] {
+                display: flex !important;
+                flex-direction: column !important;
+                gap: 1rem !important;
+                width: 100% !important;
+              }
+              .mobile-preview .grid > *,
+              .mobile-preview [class*="grid-cols"] > *,
+              .tablet-preview .grid > *,
+              .tablet-preview [class*="grid-cols"] > * {
+                width: 100% !important;
+                max-width: 100% !important;
+                margin: 0 !important;
+              }
+              .mobile-preview .space-y-4 > *:not(:first-child),
+              .tablet-preview .space-y-4 > *:not(:first-child) {
+                margin-top: 1rem !important;
+              }
+              .mobile-preview .space-y-6 > *:not(:first-child),
+              .tablet-preview .space-y-6 > *:not(:first-child) {
+                margin-top: 1.5rem !important;
+              }
+              /* تحسين النصوص للعرض المحمول */
+              .mobile-preview {
+                font-size: 14px !important;
+              }
+              .mobile-preview h2 {
+                font-size: 1.5rem !important;
+                line-height: 1.3 !important;
+              }
+              .mobile-preview h3 {
+                font-size: 1.1rem !important;
+                line-height: 1.4 !important;
+              }
+              .mobile-preview p {
+                font-size: 0.9rem !important;
+                line-height: 1.5 !important;
+              }
+              /* تحسين الحشو والهوامش */
+              .mobile-preview .p-4,
+              .mobile-preview .p-6 {
+                padding: 1rem !important;
+              }
+              .mobile-preview .px-4,
+              .mobile-preview .px-6,
+              .mobile-preview .px-8 {
+                padding-left: 1rem !important;
+                padding-right: 1rem !important;
+              }
+              /* إصلاح مشكلة القطع في النصوص */
+              .mobile-preview section {
+                height: auto !important;
+                min-height: auto !important;
+                padding: 2rem 1rem !important;
+                display: block !important;
+              }
+              .mobile-preview .container {
+                height: auto !important;
+              }
+              .mobile-preview .flex.items-center {
+                align-items: flex-start !important;
+                min-height: auto !important;
+                display: block !important;
+              }
+              /* تحسين المسافات في العرض المحمول */
+              .mobile-preview .mb-6,
+              .mobile-preview .mb-8 {
+                margin-bottom: 1.5rem !important;
+              }
+              .mobile-preview .mb-3,
+              .mobile-preview .mb-4 {
+                margin-bottom: 0.75rem !important;
+              }
+              .mobile-preview .mb-2 {
+                margin-bottom: 0.5rem !important;
+              }
+              /* تحسين البطاقات في العرض المحمول */
+              .mobile-preview .rounded-lg {
+                padding: 1.25rem !important;
+                margin-bottom: 1rem !important;
+              }
+              .mobile-preview .bg-opacity-10 {
+                background-color: rgba(255, 255, 255, 0.15) !important;
+              }
+              /* إصلاح مشكلة overflow */
+              .mobile-preview {
+                overflow: visible !important;
+              }
+              .mobile-preview section {
+                overflow: visible !important;
+              }
+            `
+          }} />
+        )}
         <DndContext
           sensors={sensors}
           collisionDetection={closestCenter}
@@ -224,7 +325,7 @@ const PreviewArea: React.FC = React.memo(() => {
             items={sectionsArray}
             strategy={verticalListSortingStrategy}
           >
-            <div className="min-h-full">
+            <div className={`min-h-full ${state.isPreviewMode && state.previewDevice === 'mobile' ? 'mobile-preview' : state.isPreviewMode && state.previewDevice === 'tablet' ? 'tablet-preview' : ''}`}>
               <AnimatePresence>
                 {state.sections.map((section) => (
                   <motion.div
